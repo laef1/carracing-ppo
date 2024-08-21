@@ -12,6 +12,9 @@ Few errors can occur trying to use stable_baselines3
 2. Import the download into your system environment variables.
 If any python packages aren't installed, use pip install.
 
-# Wandb Stats
+# Wandb Data Tracking
 Trained 16 million timesteps.
 ![](image.png)
+
+# Console Data Tracking
+![](image122.png)
