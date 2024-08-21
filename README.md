@@ -13,4 +13,5 @@ Few errors can occur trying to use stable_baselines3
 If any python packages aren't installed, use pip install.
 
 # Wandb Stats
+Trained 16 million timesteps.
 ![](image.png)
