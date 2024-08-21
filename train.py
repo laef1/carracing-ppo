@@ -73,11 +73,11 @@ class SpeedRewardWrapper(gym.Wrapper):
 
 # Initialize wandb
 wandb.init(
-    entity="manageraccont384-personal",
-    project="RL",
-    name="carracing-ppo-reupload",
-    id="zl1t5tid",
-    resume="allow",
+    entity="WANDB ACCOUNT HERE",
+    project="",
+    name="",
+    #id="",
+    resume="",
 )
 
 # Create the environment
