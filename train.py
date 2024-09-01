@@ -20,14 +20,14 @@ class CustomCNN(BaseFeaturesExtractor):
         n_input_channels = observation_space.shape[0]
         self.cnn = nn.Sequential(
             nn.Conv2d(n_input_channels, 32, kernel_size=8, stride=4, padding=0),
-            nn.ELU(),  # Changed to ELU
+            nn.ELU(),  
             nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=0),
-            nn.ELU(),  # Changed to ELU
+            nn.ELU(),  
             nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0),
-            nn.ELU(),  # Changed to ELU
+            nn.ELU(),  
             nn.Flatten(),
             nn.Linear(64 * 7 * 7, features_dim),
-            nn.ELU(),  # Changed to ELU
+            nn.ELU(), 
             nn.Dropout(p=0.5)
         )
 
@@ -44,7 +44,7 @@ class SpeedRewardWrapper(gym.Wrapper):
         obs = self.env.reset(**kwargs)
         self.start_time = (
             self.env.unwrapped.t
-        )  # Assuming the environment has a time attribute
+        )  
         return obs
 
     def step(self, action):
@@ -54,13 +54,13 @@ class SpeedRewardWrapper(gym.Wrapper):
             time_taken = end_time - self.start_time
             reward += max(
                 0, 1000 - time_taken
-            )  # Reward inversely proportional to time taken
+            ) 
 
-        # Additional reward components
+       
         speed = self.env.unwrapped.car.hull.linearVelocity.length
         off_track = self.env.unwrapped.car.on_grass
 
-        # Reward for maintaining high speed
+        
         speed_bonus = speed * 0.1
         reward += speed_bonus
 
@@ -71,7 +71,7 @@ class SpeedRewardWrapper(gym.Wrapper):
         return obs, reward, done, info
 
 
-# Initialize wandb
+
 wandb.init(
     entity="WANDB ACCOUNT HERE",
     project="",
@@ -80,7 +80,7 @@ wandb.init(
     resume="",
 )
 
-# Create the environment
+
 env = make_vec_env("CarRacing-v2", n_envs=2)
 
 
@@ -93,13 +93,13 @@ model = PPO(
     "CnnPolicy",
     env,
     policy_kwargs=policy_kwargs,
-    learning_rate=1e-4,  # Learning rate
-    n_steps=2048,  # Number of steps to run for each environment per update
-    batch_size=1024,  # Batch size
-    n_epochs=30,  # Number of epochs to update the policy
-    gamma=0.99,  # Discount factor
-    gae_lambda=0.95,  # GAE lambda
-    clip_range=0.1,  # Clipping parameter
+    learning_rate=1e-4,  
+    n_steps=2048,  
+    batch_size=1024,  
+    n_epochs=30, 
+    gamma=0.99,  
+    gae_lambda=0.95,  
+    clip_range=0.1, 
     verbose=1,
 )
 
@@ -109,16 +109,16 @@ if os.path.exists(model_file):
     model = PPO.load(model_file, env=env)
     print("Loaded PPO model from file.")
 
-# Train the model
+
 timesteps_per_update = 1000
-fps = 95  # Assuming the environment runs at 95 FPS
+fps = 95 
 
 i=1
 while True:
     print(f"Training iteration {i}...")
     model.learn(total_timesteps=timesteps_per_update, reset_num_timesteps=False)
 
-    # Collect metrics
+    
     ep_lengths = [ep_info["l"] for ep_info in model.ep_info_buffer]
     ep_rewards = [ep_info["r"] for ep_info in model.ep_info_buffer]
     ep_len_mean = np.mean(ep_lengths) if ep_lengths else 0
@@ -126,19 +126,19 @@ while True:
     time_elapsed = model.num_timesteps / fps
     total_timesteps = model.num_timesteps
 
-    # Log metrics to wandb
+    
     wandb.log(
         {
-            "rollout/ep_len_mean": ep_len_mean,  # Average length of episodes, 
-            "rollout/ep_rew_mean": ep_rew_mean,  # Average reward per episode, Generally expected to increase over time
-            "time/iterations": i,  # Current training iteration
-            "time/time_elapsed": time_elapsed,  # Time elapsed in seconds
-            "time/total_timesteps": total_timesteps,  # Total number of timesteps
-            "params/learning_rate": model.learning_rate,  # Learning rate
+            "rollout/ep_len_mean": ep_len_mean,  
+            "rollout/ep_rew_mean": ep_rew_mean, 
+            "time/iterations": i, 
+            "time/time_elapsed": time_elapsed,  
+            "time/total_timesteps": total_timesteps,  
+            "params/learning_rate": model.learning_rate,  
         }
     )
 
-    # saves the model
+    
     model.save(model_file)
     print("Model saved.")
     i+=1
